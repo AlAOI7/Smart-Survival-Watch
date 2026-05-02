@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}لوحة المشرف{% endblock %}
+{% block page_title %}<i class="fas fa-shield-halved" style="color:var(--primary)"></i> لوحة المشرف{% endblock %}
+
+{% block content %}
+<div class="page-header"><h1>لوحة تحكم المشرف</h1><p>إدارة شاملة للنظام والمستخدمين</p></div>
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div><div class="stat-value">{{ total_users }}</div><div class="stat-label">إجمالي المستخدمين</div></div></div>
+  <div class="stat-card"><div class="stat-icon green"><i class="fas fa-watch"></i></div><div><div class="stat-value">{{ total_devices }}</div><div class="stat-label">إجمالي الأجهزة</div></div></div>
+  <div class="stat-card"><div class="stat-icon red"><i class="fas fa-bell-concierge"></i></div><div><div class="stat-value">{{ active_sos }}</div><div class="stat-label">نداءات نشطة</div></div></div>
+  <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-people-group"></i></div><div><div class="stat-value">{{ available_teams }}</div><div class="stat-label">فرق متاحة</div></div></div>
+</div>
+
+<div class="grid-2">
+  <!-- All SOS -->
+  <div class="card">
+    <div class="card-title"><i class="fas fa-bell-concierge"></i> آخر نداءات الاستغاثة (الكل)</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>المستخدم</th><th>الجهاز</th><th>النوع</th><th>الحالة</th><th>فريق الإنقاذ</th><th>التاريخ</th></tr></thead>
+        <tbody>
+          {% for a in all_alerts %}
+          <tr>
+            <td>{{ a.full_name }}</td>
+            <td>{{ a.device_name }}</td>
+            <td>{% if a.alert_type=='manual' %}<span class="badge badge-danger">يدوي</span>{% else %}<span class="badge badge-warning">تلقائي</span>{% endif %}</td>
+            <td>{% if a.status=='active' %}<span class="badge badge-danger">نشط</span>{% elif a.status=='resolved' %}<span class="badge badge-active">محلول</span>{% else %}<span class="badge badge-muted">{{ a.status }}</span>{% endif %}</td>
+            <td>{{ a.team_name or '—' }}</td>
+            <td style="color:var(--text-muted);font-size:12px">{{ a.created_at.strftime('%Y/%m/%d') if a.created_at else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Users -->
+  <div class="card">
+    <div class="card-title"><i class="fas fa-users"></i> المستخدمون</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الاسم</th><th>البريد</th><th>الدور</th><th>الحالة</th><th>التسجيل</th></tr></thead>
+        <tbody>
+          {% for u in all_users %}
+          <tr>
+            <td style="font-weight:600">{{ u.full_name }}</td>
+            <td style="color:var(--text-muted);font-size:12px">{{ u.email }}</td>
+            <td>
+              {% if u.role=='admin' %}<span class="badge badge-danger">مشرف</span>
+              {% elif u.role=='rescue_team' %}<span class="badge badge-success">فريق إنقاذ</span>
+              {% else %}<span class="badge badge-info">مستخدم</span>{% endif %}
+            </td>
+            <td><span class="badge {% if u.is_active %}badge-active{% else %}badge-muted{% endif %}">{% if u.is_active %}نشط{% else %}موقوف{% endif %}</span></td>
+            <td style="color:var(--text-muted);font-size:12px">{{ u.created_at.strftime('%Y/%m/%d') if u.created_at else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

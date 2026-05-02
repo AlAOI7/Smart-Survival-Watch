@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}تفاصيل الجهاز{% endblock %}
+{% block page_title %}<i class="fas fa-watch" style="color:var(--primary)"></i> {{ device.device_name }}{% endblock %}
+
+{% block content %}
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+  <a href="{{ url_for('devices') }}" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-right"></i> رجوع</a>
+  <span class="badge {% if device.is_active %}badge-active{% else %}badge-muted{% endif %}">{% if device.is_active %}● نشط{% else %}○ غير نشط{% endif %}</span>
+  <span style="color:var(--text-muted);font-size:12px;font-family:monospace">{{ device.device_id }}</span>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon {% if device.battery_level>60 %}green{% elif device.battery_level>20 %}yellow{% else %}red{% endif %}"><i class="fas fa-battery-three-quarters"></i></div>
+    <div><div class="stat-value">{{ device.battery_level }}%</div><div class="stat-label">مستوى البطارية</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon {% if device.satellite_connected %}green{% else %}red{% endif %}"><i class="fas fa-satellite"></i></div>
+    <div><div class="stat-value">{% if device.satellite_connected %}متصل{% else %}منقطع{% endif %}</div><div class="stat-label">الأقمار الصناعية</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon yellow"><i class="fas fa-solar-panel"></i></div>
+    <div><div class="stat-value">{% if device.solar_charging %}يشحن{% else %}لا{% endif %}</div><div class="stat-label">الشحن الشمسي</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon blue"><i class="fas fa-code-branch"></i></div>
+    <div><div class="stat-value">{{ device.firmware_version }}</div><div class="stat-label">إصدار النظام</div></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Nearby Devices -->
+  <div class="card">
+    <div class="card-title"><i class="fas fa-radar"></i> الأجهزة المكتشفة
+      <button onclick="simulateScan({{ device.id }})" class="btn btn-ghost btn-sm" style="margin-right:auto"><i class="fas fa-rotate"></i> مسح جديد</button>
+    </div>
+    {% if nearby %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>النوع</th><th>قوة الإشارة</th><th>المسافة التقديرية</th><th>وقت الاكتشاف</th></tr></thead>
+        <tbody>
+          {% for n in nearby %}
+          <tr>
+            <td><span class="badge badge-info">{{ n.detected_signal_type }}</span></td>
+            <td style="color:{% if n.signal_strength > -60 %}#2ed573{% elif n.signal_strength > -80 %}#ffa502{% else %}#ff4757{% endif %}">{{ n.signal_strength }} dBm</td>
+            <td>{% if n.estimated_distance %}<b>{{ "%.0f"|format(n.estimated_distance) }}</b> م{% else %}—{% endif %}</td>
+            <td style="color:var(--text-muted);font-size:12px">{{ n.detected_at.strftime('%H:%M:%S') if n.detected_at else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:30px;color:var(--text-muted)"><i class="fas fa-signal-slash" style="font-size:36px;opacity:.3;display:block;margin-bottom:12px"></i>لا توجد أجهزة مكتشفة</div>
+    {% endif %}
+  </div>
+
+  <!-- SOS History -->
+  <div class="card">
+    <div class="card-title"><i class="fas fa-clock-rotate-left"></i> تاريخ الاستغاثة</div>
+    {% if alerts %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>النوع</th><th>الحالة</th><th>التاريخ</th></tr></thead>
+        <tbody>
+          {% for a in alerts %}
+          <tr>
+            <td><span class="badge {% if a.alert_type=='manual' %}badge-danger{% else %}badge-warning{% endif %}">{{ a.alert_type }}</span></td>
+            <td><span class="badge {% if a.status=='active' %}badge-danger{% elif a.status=='resolved' %}badge-active{% else %}badge-muted{% endif %}">{{ a.status }}</span></td>
+            <td style="color:var(--text-muted);font-size:12px">{{ a.created_at.strftime('%Y/%m/%d') if a.created_at else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:30px;color:var(--text-muted)"><i class="fas fa-shield-check" style="font-size:36px;color:var(--success);opacity:.4;display:block;margin-bottom:12px"></i>لا سجلات استغاثة</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Location Log -->
+{% if locations %}
+<div class="card" style="margin-top:20px">
+  <div class="card-title"><i class="fas fa-map-pin"></i> سجل المواقع (آخر 20 موقع)</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>خط العرض</th><th>خط الطول</th><th>الارتفاع</th><th>الأقمار</th><th>السرعة</th><th>الوقت</th></tr></thead>
+      <tbody>
+        {% for l in locations %}
+        <tr>
+          <td style="font-family:monospace;font-size:12px">{{ l.latitude }}</td>
+          <td style="font-family:monospace;font-size:12px">{{ l.longitude }}</td>
+          <td>{{ l.altitude }} م</td>
+          <td><span class="badge badge-info"><i class="fas fa-satellite"></i> {{ l.satellite_count }}</span></td>
+          <td>{{ l.speed }} كم/س</td>
+          <td style="color:var(--text-muted);font-size:12px">{{ l.recorded_at.strftime('%Y/%m/%d %H:%M') if l.recorded_at else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function simulateScan(id){
+  fetch(`/api/simulate-scan/${id}`,{method:'POST'}).then(r=>r.json()).then(d=>{
+    if(d.success){ showToast(`🔍 تم اكتشاف ${d.devices_found} أجهزة`,'success'); setTimeout(()=>location.reload(),1500); }
+  });
+}
+</script>
+{% endblock %}

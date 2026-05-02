@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}نداءات الاستغاثة{% endblock %}
+{% block page_title %}<i class="fas fa-bell-concierge" style="color:var(--accent)"></i> نداءات الاستغاثة{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+  <div><h1>مركز الاستغاثة</h1><p>إدارة ومتابعة جميع نداءات الاستغاثة</p></div>
+  <button class="btn btn-danger" onclick="openSosModal()"><i class="fas fa-satellite-dish"></i> إرسال نداء استغاثة</button>
+</div>
+
+<!-- SOS Trigger Card -->
+<div class="card" style="margin-bottom:24px;background:linear-gradient(135deg,rgba(255,23,68,0.08),rgba(196,34,40,0.06));border-color:rgba(255,23,68,0.2)">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="width:60px;height:60px;background:linear-gradient(135deg,#ff1744,#c62828);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;box-shadow:0 0 25px rgba(255,23,68,0.4);animation:sos-pulse 2s infinite">
+        <i class="fas fa-sos"></i>
+      </div>
+      <div>
+        <div style="color:#fff;font-weight:800;font-size:17px">زر الاستغاثة الطارئة</div>
+        <div style="color:rgba(232,244,253,0.6);font-size:13px">سيتم إرسال موقعك لأقرب فريق إنقاذ فوراً</div>
+      </div>
+    </div>
+    <button class="btn btn-danger" onclick="openSosModal()" style="font-size:16px;padding:14px 30px">
+      <i class="fas fa-broadcast-tower"></i> SOS الآن
+    </button>
+  </div>
+</div>
+
+<!-- Alerts Table -->
+<div class="card">
+  <div class="card-title"><i class="fas fa-list"></i> سجل نداءات الاستغاثة</div>
+  {% if alerts %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>#</th><th>الجهاز</th><th>النوع</th><th>الموقع</th><th>الأجهزة المحيطة</th><th>فريق الإنقاذ</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr>
+      </thead>
+      <tbody>
+        {% for a in alerts %}
+        <tr>
+          <td style="color:var(--text-muted);font-size:12px">#{{ a.id }}</td>
+          <td><i class="fas fa-watch" style="color:var(--primary);margin-left:6px"></i>{{ a.device_name }}</td>
+          <td>
+            {% if a.alert_type == 'manual' %}<span class="badge badge-danger">يدوي</span>
+            {% elif a.alert_type == 'auto' %}<span class="badge badge-warning">تلقائي</span>
+            {% elif a.alert_type == 'no_nearby_devices' %}<span class="badge badge-info">لا أجهزة</span>
+            {% else %}<span class="badge badge-muted">{{ a.alert_type }}</span>{% endif %}
+          </td>
+          <td>
+            {% if a.latitude %}
+            <a href="https://maps.google.com/?q={{ a.latitude }},{{ a.longitude }}" target="_blank" class="btn btn-ghost btn-sm">
+              <i class="fas fa-map-pin"></i> عرض
+            </a>
+            {% else %}<span style="color:var(--text-muted)">—</span>{% endif %}
+          </td>
+          <td style="text-align:center">
+            <span class="badge {% if a.nearby_devices_count > 0 %}badge-active{% else %}badge-danger{% endif %}">
+              {{ a.nearby_devices_count }} جهاز
+            </span>
+          </td>
+          <td>{{ a.team_name or '—' }}</td>
+          <td>
+            {% if a.status == 'active' %}<span class="badge badge-danger"><i class="fas fa-circle" style="font-size:7px"></i> نشط</span>
+            {% elif a.status == 'resolved' %}<span class="badge badge-active"><i class="fas fa-check"></i> تم الإنقاذ</span>
+            {% elif a.status == 'responding' %}<span class="badge badge-warning">استجابة</span>
+            {% else %}<span class="badge badge-muted">ملغي</span>{% endif %}
+          </td>
+          <td style="color:var(--text-muted);font-size:12px;white-space:nowrap">{{ a.created_at.strftime('%Y/%m/%d %H:%M') if a.created_at else '—' }}</td>
+          <td>
+            {% if a.status == 'active' %}
+            <button onclick="resolveAlert({{ a.id }}, this)" class="btn btn-success btn-sm"><i class="fas fa-check"></i> حل</button>
+            <button onclick="analyzeAI({{ a.id }})" class="btn btn-sm" style="background:var(--accent);color:var(--warning)"><i class="fas fa-brain"></i> تحليل AI</button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:60px;color:var(--text-muted)">
+    <i class="fas fa-shield-check" style="font-size:50px;color:var(--success);opacity:.4;display:block;margin-bottom:16px"></i>
+    <h3 style="color:#fff;margin-bottom:8px">لا توجد نداءات استغاثة</h3>
+    <p>كل شيء بخير — لم يتم إرسال أي نداء استغاثة بعد</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- SOS Modal -->
+<div class="modal-overlay" id="sosModalPage">
+  <div class="modal-box sos-modal">
+    <div class="sos-modal-icon"><i class="fas fa-satellite-dish"></i></div>
+    <h2>إرسال نداء استغاثة</h2>
+    <p>سيتم إرسال موقعك الحالي لأقرب فريق إنقاذ</p>
+    <select id="pageDeviceSel" class="sos-select">
+      <option value="">-- اختر الجهاز --</option>
+      {% for d in devices %}
+      <option value="{{ d.id }}">{{ d.device_name }} ({{ d.device_id }})</option>
+      {% endfor %}
+    </select>
+    <textarea id="pageMsg" class="sos-textarea" placeholder="وصف الحالة الطارئة..."></textarea>
+    <div class="sos-btns">
+      <button class="btn-sos-confirm" onclick="sendPageSos()"><i class="fas fa-broadcast-tower"></i> إرسال نداء الاستغاثة</button>
+      <button class="btn-sos-cancel" onclick="closeModal('sosModalPage')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Modal -->
+<div class="modal-overlay" id="aiModal">
+  <div class="modal-box ai-card">
+    <div class="ai-icon" style="width:80px;height:80px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;"><i class="fas fa-brain" style="font-size:32px;"></i></div>
+    <h2 style="color:var(--primary);margin-bottom:8px">مُحلل الطوارئ الذكي</h2>
+    <div id="aiContent" style="text-align:right; font-size:15px; color:var(--text); line-height:1.7; background:rgba(255,255,255,0.8); padding:16px; border-radius:12px; border:1px solid var(--border); margin-bottom:20px; white-space:pre-wrap;">
+        جاري تحليل البيانات... <i class="fas fa-spinner fa-spin"></i>
+    </div>
+    <div class="sos-btns">
+      <button class="btn-sos-cancel" onclick="closeModal('aiModal')">إغلاق</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openSosModal(){ document.getElementById('sosModalPage').classList.add('active'); }
+function resolveAlert(id, btn){
+  if(!confirm('تأكيد: هل تم حل هذا النداء؟')) return;
+  fetch(`/api/sos/${id}/resolve`,{method:'POST'}).then(r=>r.json()).then(d=>{
+    if(d.success){ btn.closest('tr').querySelector('td:nth-last-child(2)').innerHTML='<span class="badge badge-active"><i class="fas fa-check"></i> تم الإنقاذ</span>'; btn.remove(); }
+  });
+}
+function sendPageSos(){
+  const devId=document.getElementById('pageDeviceSel').value;
+  const msg=document.getElementById('pageMsg').value;
+  if(!devId){ showToast('الرجاء اختيار جهاز','error'); return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    sendSos(devId,pos.coords.latitude,pos.coords.longitude,msg);
+  },()=>sendSos(devId,24.7136,46.6753,msg));
+}
+function sendSos(devId,lat,lng,msg){
+  fetch('/sos/trigger',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({device_id:devId,latitude:lat,longitude:lng,message:msg,alert_type:'manual'})
+  }).then(r=>r.json()).then(d=>{
+    if(d.success){ closeModal('sosModalPage'); showToast(`✅ تم إرسال نداء الاستغاثة! فريق: ${d.team||'يتم التعيين'}`,'success'); setTimeout(()=>location.reload(),2000); }
+  });
+}
+
+function analyzeAI(id){
+  document.getElementById('aiContent').innerHTML = 'جاري التحليل باستخدام الذكاء الاصطناعي... <i class="fas fa-spinner fa-spin"></i>';
+  document.getElementById('aiModal').classList.add('active');
+  fetch(`/api/ai-analyze/${id}`).then(r=>r.json()).then(d=>{
+    if(d.success){
+      document.getElementById('aiContent').innerText = d.analysis;
+    }else{
+      document.getElementById('aiContent').innerHTML = `<span style="color:red"><i class="fas fa-exclamation-triangle"></i> ${d.message}</span>`;
+    }
+  }).catch(e=>{
+    document.getElementById('aiContent').innerHTML = `<span style="color:red">حدث خطأ في الاتصال.</span>`;
+  });
+}
+</script>
+{% endblock %}

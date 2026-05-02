@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ساعة النجاة الذكية{% endblock %} | NajatWatch</title>
+    <meta name="description" content="نظام ساعة النجاة الذكية - حماية وإنقاذ في أي مكان">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ══════════════════ SIDEBAR ══════════════════ -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <i class="fas fa-satellite"></i>
+        </div>
+        <div class="brand-text">
+            <span class="brand-name">NajatWatch</span>
+            <span class="brand-sub">نظام الإنقاذ الذكي</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">القائمة الرئيسية</div>
+        <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-chart-pie"></i></span>
+            <span class="nav-label">لوحة التحكم</span>
+        </a>
+        <a href="{{ url_for('map_view') }}" class="nav-item {% if request.endpoint == 'map_view' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-map-location-dot"></i></span>
+            <span class="nav-label">خريطة التتبع</span>
+        </a>
+        <a href="{{ url_for('devices') }}" class="nav-item {% if request.endpoint in ['devices','add_device','device_detail'] %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-watch"></i></span>
+            <span class="nav-label">أجهزتي</span>
+        </a>
+
+        <div class="nav-section-label">الإنقاذ والتنبيهات</div>
+        <a href="{{ url_for('sos_list') }}" class="nav-item {% if request.endpoint == 'sos_list' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-bell-concierge"></i></span>
+            <span class="nav-label">نداءات الاستغاثة</span>
+            <span class="nav-badge sos-badge" id="sos-badge" style="display:none"></span>
+        </a>
+        <a href="{{ url_for('rescue_teams') }}" class="nav-item {% if request.endpoint == 'rescue_teams' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-people-group"></i></span>
+            <span class="nav-label">فرق الإنقاذ</span>
+        </a>
+        <a href="{{ url_for('notifications') }}" class="nav-item {% if request.endpoint == 'notifications' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-bell"></i></span>
+            <span class="nav-label">الإشعارات</span>
+            {% if unread_notifs is defined and unread_notifs > 0 %}
+            <span class="nav-badge">{{ unread_notifs }}</span>
+            {% endif %}
+        </a>
+
+        {% if current_user.role == 'admin' %}
+        <div class="nav-section-label">الإدارة</div>
+        <a href="{{ url_for('admin') }}" class="nav-item {% if request.endpoint == 'admin' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-shield-halved"></i></span>
+            <span class="nav-label">لوحة المشرف</span>
+        </a>
+        {% endif %}
+
+        <div class="nav-section-label">حسابي</div>
+        <a href="{{ url_for('profile') }}" class="nav-item {% if request.endpoint == 'profile' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-user-circle"></i></span>
+            <span class="nav-label">الملف الشخصي</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-user">
+        <a href="{{ url_for('profile') }}" style="text-decoration: none; display: flex; align-items: center; gap: 10px; flex: 1;">
+            <div class="user-avatar">{{ current_user.full_name[0] }}</div>
+            <div class="user-info">
+                <span class="user-name">{{ current_user.full_name }}</span>
+                <span class="user-role">
+                    {% if current_user.role == 'admin' %}مشرف النظام
+                    {% elif current_user.role == 'rescue_team' %}فريق الإنقاذ
+                    {% else %}مستخدم{% endif %}
+                </span>
+            </div>
+        </a>
+        <a href="{{ url_for('logout') }}" class="logout-btn" title="تسجيل الخروج">
+            <i class="fas fa-right-from-bracket"></i>
+        </a>
+    </div>
+</aside>
+
+<!-- ══════════════════ MAIN CONTENT ══════════════════ -->
+<div class="main-wrapper">
+    <!-- Topbar -->
+    <header class="topbar">
+        <button class="topbar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+        <div class="topbar-actions">
+            <div class="topbar-satellite">
+                <span class="sat-dot"></span>
+                <span>متصل بالأقمار الصناعية</span>
+            </div>
+            <button class="sos-quick-btn" id="quickSosBtn" title="نداء استغاثة سريع">
+                <i class="fas fa-sos"></i> SOS
+            </button>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-msg flash-{{ category }}">
+            <i class="fas {% if category == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+            {{ message }}
+            <button onclick="this.parentElement.remove()" class="flash-close">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+
+<!-- SOS Quick Modal -->
+<div class="modal-overlay" id="quickSosModal">
+    <div class="modal-box sos-modal">
+        <div class="sos-modal-icon">
+            <i class="fas fa-sos"></i>
+        </div>
+        <h2>نداء استغاثة عاجل</h2>
+        <p>سيتم إرسال موقعك الحالي لأقرب فريق إنقاذ فوراً</p>
+        <select id="sosDev" class="sos-select">
+            <option value="">-- اختر الجهاز --</option>
+        </select>
+        <textarea id="sosMsg" class="sos-textarea" placeholder="وصف الحالة الطارئة (اختياري)..."></textarea>
+        <div class="sos-btns">
+            <button class="btn-sos-confirm" id="confirmSos">
+                <i class="fas fa-satellite-dish"></i> إرسال نداء الاستغاثة
+            </button>
+            <button class="btn-sos-cancel" onclick="closeModal('quickSosModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+const socket = io();
+socket.on('sos_alert', (data) => {
+    showToast(`🆘 نداء استغاثة جديد! فريق: ${data.team}`, 'sos');
+});
+
+// Sidebar toggle
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+    document.querySelector('.main-wrapper').classList.toggle('expanded');
+});
+
+// Quick SOS
+const quickSosBtn = document.getElementById('quickSosBtn');
+quickSosBtn.addEventListener('click', () => {
+    loadUserDevices();
+    document.getElementById('quickSosModal').classList.add('active');
+});
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+function loadUserDevices() {
+    fetch('/devices')
+        .then(r => r.text()).then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const sel = document.getElementById('sosDev');
+            sel.innerHTML = '<option value="">-- اختر الجهاز --</option>';
+        }).catch(() => {});
+}
+
+document.getElementById('confirmSos').addEventListener('click', () => {
+    const deviceId = document.getElementById('sosDev').value;
+    const msg = document.getElementById('sosMsg').value;
+    if (!deviceId) { showToast('الرجاء اختيار جهاز', 'error'); return; }
+    navigator.geolocation.getCurrentPosition((pos) => {
+        fetch('/sos/trigger', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                device_id: deviceId,
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
+                message: msg || 'نداء استغاثة عاجل',
+                alert_type: 'manual'
+            })
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                closeModal('quickSosModal');
+                showToast(`✅ تم إرسال نداء الاستغاثة! فريق الإنقاذ: ${data.team || 'يتم التعيين'}`, 'success');
+            }
+        });
+    }, () => {
+        // fallback coords
+        fetch('/sos/trigger', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({device_id: deviceId, message: msg, alert_type: 'manual'})
+        }).then(r => r.json()).then(d => { if(d.success) { closeModal('quickSosModal'); showToast('تم إرسال نداء الاستغاثة!', 'success'); } });
+    });
+});
+
+function showToast(msg, type = 'success') {
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.classList.add('show'), 50);
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 4000);
+}
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}لوحة التحكم{% endblock %}
+{% block page_title %}<i class="fas fa-chart-pie" style="color:var(--primary)"></i> لوحة التحكم{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>مرحباً، {{ current_user.full_name }} 👋</h1>
+  <p>إليك ملخص حالة أجهزتك ونشاط الإنقاذ</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue"><i class="fas fa-watch"></i></div>
+    <div>
+      <div class="stat-value">{{ device_count }}</div>
+      <div class="stat-label">أجهزة مسجلة</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red"><i class="fas fa-bell-concierge"></i></div>
+    <div>
+      <div class="stat-value">{{ active_sos }}</div>
+      <div class="stat-label">نداءات نشطة</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon yellow"><i class="fas fa-satellite-dish"></i></div>
+    <div>
+      <div class="stat-value">{{ total_sos }}</div>
+      <div class="stat-label">إجمالي الاستغاثات</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green"><i class="fas fa-bell"></i></div>
+    <div>
+      <div class="stat-value">{{ unread_notifs }}</div>
+      <div class="stat-label">إشعارات غير مقروءة</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Devices -->
+  <div class="card">
+    <div class="card-title"><i class="fas fa-watch"></i> أجهزتي <a href="{{ url_for('add_device') }}" class="btn btn-primary btn-sm" style="margin-right:auto">+ إضافة جهاز</a></div>
+    {% if devices %}
+    <div class="device-cards">
+      {% for d in devices %}
+      <div class="device-card">
+        <div class="device-card-header">
+          <div class="device-icon"><i class="fas fa-watch"></i></div>
+          <div>
+            <div class="device-name">{{ d.device_name }}</div>
+            <div class="device-id-text">{{ d.device_id }}</div>
+          </div>
+          <span class="badge {% if d.is_active %}badge-active{% else %}badge-muted{% endif %}" style="margin-right:auto">
+            {% if d.is_active %}نشط{% else %}غير نشط{% endif %}
+          </span>
+        </div>
+        <div class="device-stats">
+          <div class="dstat">
+            <div class="dstat-val" style="color:{% if d.battery_level > 60 %}#2ed573{% elif d.battery_level > 20 %}#ffa502{% else %}#ff4757{% endif %}">
+              {{ d.battery_level }}%
+            </div>
+            <div class="dstat-lbl">⚡ البطارية</div>
+            <div class="battery-bar">
+              <div class="battery-fill {% if d.battery_level>60 %}battery-high{% elif d.battery_level>20 %}battery-mid{% else %}battery-low{% endif %}" style="width:{{ d.battery_level }}%"></div>
+            </div>
+          </div>
+          <div class="dstat">
+            <div class="dstat-val" style="color:{% if d.satellite_connected %}#2ed573{% else %}#ff4757{% endif %}">
+              {% if d.satellite_connected %}<i class="fas fa-satellite"></i>{% else %}<i class="fas fa-satellite-dish"></i>{% endif %}
+            </div>
+            <div class="dstat-lbl">الأقمار الصناعية</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <a href="{{ url_for('device_detail', device_id=d.id) }}" class="btn btn-ghost btn-sm" style="flex:1;justify-content:center"><i class="fas fa-eye"></i> التفاصيل</a>
+          {% if d.solar_charging %}<span class="badge badge-warning"><i class="fas fa-solar-panel"></i> شمسي</span>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:40px;color:var(--text-muted)">
+      <i class="fas fa-watch" style="font-size:40px;margin-bottom:12px;display:block;opacity:.3"></i>
+      لا توجد أجهزة مسجلة بعد
+      <br><a href="{{ url_for('add_device') }}" class="btn btn-primary" style="margin-top:16px;display:inline-flex"><i class="fas fa-plus"></i> أضف جهازك الأول</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Recent SOS -->
+  <div class="card">
+    <div class="card-title"><i class="fas fa-bell-concierge"></i> آخر نداءات الاستغاثة <a href="{{ url_for('sos_list') }}" class="btn btn-ghost btn-sm" style="margin-right:auto">عرض الكل</a></div>
+    {% if recent_alerts %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>الجهاز</th><th>النوع</th><th>الحالة</th><th>التاريخ</th></tr></thead>
+        <tbody>
+          {% for alert in recent_alerts %}
+          <tr>
+            <td><i class="fas fa-watch" style="color:var(--primary);margin-left:6px"></i>{{ alert.device_name }}</td>
+            <td>
+              {% if alert.alert_type == 'manual' %}<span class="badge badge-danger">يدوي</span>
+              {% elif alert.alert_type == 'auto' %}<span class="badge badge-warning">تلقائي</span>
+              {% else %}<span class="badge badge-info">لا أجهزة</span>{% endif %}
+            </td>
+            <td>
+              {% if alert.status == 'active' %}<span class="badge badge-danger"><i class="fas fa-circle" style="font-size:7px"></i> نشط</span>
+              {% elif alert.status == 'resolved' %}<span class="badge badge-active">تم الإنقاذ</span>
+              {% elif alert.status == 'responding' %}<span class="badge badge-warning">استجابة</span>
+              {% else %}<span class="badge badge-muted">ملغي</span>{% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:12px">{{ alert.created_at.strftime('%Y/%m/%d') if alert.created_at else '-' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:40px;color:var(--text-muted)">
+      <i class="fas fa-shield-check" style="font-size:40px;margin-bottom:12px;display:block;color:var(--success);opacity:.5"></i>
+      لا توجد نداءات استغاثة — كل شيء على ما يرام ✅
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Chart -->
+<div class="card" style="margin-top:20px">
+  <div class="card-title"><i class="fas fa-chart-bar"></i> إحصائيات الاستغاثة الشهرية</div>
+  <canvas id="sosChart" height="80"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch('/api/stats').then(r=>r.json()).then(data=>{
+  const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const labels=Array.from({length:12},(_,i)=>months[i]);
+  const counts=Array(12).fill(0);
+  (data.sos_monthly||[]).forEach(r=>{ counts[r.month-1]=r.count; });
+  new Chart(document.getElementById('sosChart'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label:'نداءات الاستغاثة',
+        data:counts,
+        backgroundColor:'rgba(255,71,87,0.25)',
+        borderColor:'#ff4757',
+        borderWidth:2,
+        borderRadius:8,
+        borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:'#7a9bb5',font:{family:'Tajawal'}}}},
+      scales:{
+        x:{ticks:{color:'#7a9bb5',font:{family:'Tajawal'}},grid:{color:'rgba(255,255,255,0.04)'}},
+        y:{ticks:{color:'#7a9bb5',font:{family:'Tajawal'}},grid:{color:'rgba(255,255,255,0.04)'},beginAtZero:true}
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

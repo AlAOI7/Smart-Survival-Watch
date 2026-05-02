@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}فرق الإنقاذ{% endblock %}
+{% block page_title %}<i class="fas fa-people-group" style="color:var(--success)"></i> فرق الإنقاذ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>فرق الإنقاذ المتاحة</h1>
+  <p>{{ teams|length }} فريق إنقاذ متاح عبر المملكة العربية السعودية</p>
+</div>
+<div class="team-cards">
+  {% for t in teams %}
+  <div class="team-card">
+    <div class="team-avatar"><i class="fas fa-shield-halved"></i></div>
+    <div class="team-name">{{ t.team_name }}</div>
+    <div class="team-info"><i class="fas fa-location-dot"></i> {{ t.region or '—' }}</div>
+    <div class="team-info"><i class="fas fa-user-tie"></i> {{ t.team_leader or '—' }}</div>
+    <div class="team-info"><i class="fas fa-users"></i> {{ t.members_count }} عضو</div>
+    {% if t.contact_phone %}
+    <div class="team-info"><i class="fas fa-phone"></i> {{ t.contact_phone }}</div>
+    {% endif %}
+    <div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between">
+      <span class="badge {% if t.is_available %}badge-active{% else %}badge-danger{% endif %}">
+        {% if t.is_available %}● متاح{% else %}○ مشغول{% endif %}
+      </span>
+      {% if t.contact_phone %}
+      <a href="tel:{{ t.contact_phone }}" class="btn btn-success btn-sm"><i class="fas fa-phone"></i> اتصال</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

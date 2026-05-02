@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}الملف الشخصي{% endblock %}
+{% block page_title %}البيانات الشخصية{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>الملف الشخصي</h1>
+    <p>قم بإدارة بياناتك الشخصية وإعدادات الحساب الخاصة بك</p>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-title" style="margin-bottom: 24px;">
+        <i class="fas fa-user-edit" style="font-size: 20px;"></i> 
+        <span style="font-size: 18px;">تعديل البيانات الشخصية</span>
+    </div>
+    
+    <form method="POST" action="{{ url_for('profile') }}">
+        <div class="form-group">
+            <label class="form-label">الاسم الكامل</label>
+            <div class="input-wrap" style="position: relative;">
+                <i class="fas fa-user" style="position: absolute; top: 50%; transform: translateY(-50%); right: 14px; color: #94a3b8;"></i>
+                <input type="text" name="full_name" class="form-control" value="{{ current_user.full_name }}" required style="padding-right: 40px;">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">البريد الإلكتروني (غير قابل للتعديل)</label>
+            <div class="input-wrap" style="position: relative;">
+                <i class="fas fa-envelope" style="position: absolute; top: 50%; transform: translateY(-50%); right: 14px; color: #94a3b8;"></i>
+                <input type="email" class="form-control" value="{{ current_user.email }}" readonly style="padding-right: 40px; background: var(--bg-deep); color: var(--text-muted); cursor: not-allowed; border-color: var(--border);">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">رقم الهاتف</label>
+            <div class="input-wrap" style="position: relative;">
+                <i class="fas fa-phone" style="position: absolute; top: 50%; transform: translateY(-50%); right: 14px; color: #94a3b8;"></i>
+                <input type="tel" name="phone" class="form-control" value="{{ current_user.phone }}" placeholder="05xxxxxxxx" style="padding-right: 40px;">
+            </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);">
+            <label class="form-label" style="color: var(--accent);">تغيير كلمة المرور (اختياري)</label>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">اترك الحقل فارغاً إذا لم تكن ترغب في تغيير كلمة المرور الحالية.</p>
+            <div class="input-wrap" style="position: relative;">
+                <i class="fas fa-lock" style="position: absolute; top: 50%; transform: translateY(-50%); right: 14px; color: #94a3b8;"></i>
+                <input type="password" name="new_password" class="form-control" placeholder="كلمة المرور الجديدة" minlength="6" style="padding-right: 40px;">
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 14px; margin-top: 36px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center; padding: 14px; font-size: 16px;">
+                <i class="fas fa-save"></i> حفظ التعديلات
+            </button>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger" style="flex: 1; justify-content: center; padding: 14px; font-size: 16px;">
+                <i class="fas fa-right-from-bracket"></i> تسجيل الخروج
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

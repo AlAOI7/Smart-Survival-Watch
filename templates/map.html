@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}خريطة التتبع{% endblock %}
+{% block page_title %}<i class="fas fa-map-location-dot" style="color:var(--primary)"></i> خريطة التتبع المباشر{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+#map{width:100%;height:calc(100vh - 200px);border-radius:16px;border:1px solid rgba(0,212,255,0.2)}
+.map-panel{position:absolute;top:16px;right:16px;z-index:1000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.map-legend{background:rgba(5,11,24,0.92);backdrop-filter:blur(12px);border:1px solid rgba(0,212,255,0.2);border-radius:12px;padding:14px 18px;pointer-events:all}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-muted);margin-bottom:6px}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="position:relative">
+  <div id="map"></div>
+  <div class="map-panel">
+    <div class="map-legend">
+      <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:10px"><i class="fas fa-circle-info" style="color:var(--primary)"></i> المفتاح</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#00d4ff"></div> جهاز (ساعة)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff1744"></div> نداء استغاثة نشط</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2ed573"></div> فريق إنقاذ متاح</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const map = L.map('map', {zoomControl:false}).setView([23.8859, 45.0792], 6);
+L.control.zoom({position:'bottomright'}).addTo(map);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; CartoDB',maxZoom:19
+}).addTo(map);
+
+function makeIcon(color, symbol) {
+  return L.divIcon({
+    html:`<div style="width:36px;height:36px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.3);box-shadow:0 0 16px ${color}66">
+      <span style="transform:rotate(45deg);font-size:14px">${symbol}</span></div>`,
+    iconSize:[36,36], iconAnchor:[18,36], popupAnchor:[0,-36], className:''
+  });
+}
+
+{% for d in devices %}
+{% if d.last_seen %}
+L.marker([24.7136, 46.6753], {icon: makeIcon('#00d4ff','⌚')})
+  .addTo(map)
+  .bindPopup(`<div style="font-family:Tajawal,sans-serif;direction:rtl;min-width:160px">
+    <b style="color:#00d4ff">{{ d.device_name }}</b><br>
+    <small style="color:#888">{{ d.device_id }}</small><br>
+    🔋 البطارية: {{ d.battery_level }}%
+  </div>`);
+{% endif %}
+{% endfor %}
+
+{% for sos in active_sos %}
+{% if sos.latitude %}
+const sosMarker{{ sos.id }} = L.marker([{{ sos.latitude }}, {{ sos.longitude }}], {icon: makeIcon('#ff1744','🆘')})
+  .addTo(map)
+  .bindPopup(`<div style="font-family:Tajawal,sans-serif;direction:rtl;min-width:180px">
+    <b style="color:#ff4757">⚠ نداء استغاثة نشط</b><br>
+    الجهاز: <b>{{ sos.device_name }}</b><br>
+    {{ sos.message or '' }}
+    <br><button onclick="resolveFromMap({{ sos.id }})" style="margin-top:8px;background:#ff4757;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:Tajawal">تم الإنقاذ ✓</button>
+  </div>`);
+sosMarker{{ sos.id }}.openPopup();
+{% endif %}
+{% endfor %}
+
+{% for t in teams %}
+{% if t.latitude %}
+L.marker([{{ t.latitude }}, {{ t.longitude }}], {icon: makeIcon('#2ed573','🛡')})
+  .addTo(map)
+  .bindPopup(`<div style="font-family:Tajawal,sans-serif;direction:rtl;min-width:160px">
+    <b style="color:#2ed573">{{ t.team_name }}</b><br>
+    المنطقة: {{ t.region }}<br>
+    الأعضاء: {{ t.members_count }}
+  </div>`);
+{% endif %}
+{% endfor %}
+
+function resolveFromMap(id){
+  fetch(`/api/sos/${id}/resolve`,{method:'POST'}).then(r=>r.json()).then(d=>{
+    if(d.success) alert('تم تحديث حالة نداء الاستغاثة');
+  });
+}
+</script>
+{% endblock %}

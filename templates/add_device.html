@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}إضافة جهاز{% endblock %}
+{% block page_title %}<i class="fas fa-plus" style="color:var(--primary)"></i> إضافة جهاز جديد{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;margin:0 auto">
+  <div class="page-header">
+    <h1>تسجيل ساعة جديدة</h1>
+    <p>أضف ساعة النجاة الذكية لبدء المراقبة والحماية</p>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:16px;padding:20px;background:rgba(0,212,255,0.06);border-radius:12px;margin-bottom:28px;border:1px solid rgba(0,212,255,0.15)">
+      <div style="width:56px;height:56px;background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(0,85,170,0.3));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--primary)"><i class="fas fa-watch"></i></div>
+      <div>
+        <div style="color:#fff;font-weight:700;font-size:15px">ساعة النجاة SW-Series</div>
+        <div style="color:var(--text-muted);font-size:12px">سيتم توليد معرف فريد تلقائياً للجهاز</div>
+      </div>
+    </div>
+    <form method="POST" action="{{ url_for('add_device') }}">
+      <div class="form-group">
+        <label class="form-label">اسم الجهاز *</label>
+        <input type="text" name="device_name" class="form-control" placeholder="مثال: ساعتي الجبلية" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الرقم التسلسلي (اختياري)</label>
+        <input type="text" name="serial_number" class="form-control" placeholder="SW-XXXX-XXXX">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:5px">يوجد خلف الساعة أو في صندوق المنتج</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:24px">
+        <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center"><i class="fas fa-satellite"></i> تسجيل الجهاز</button>
+        <a href="{{ url_for('devices') }}" class="btn btn-ghost">إلغاء</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="card-title"><i class="fas fa-circle-info"></i> كيفية الإعداد</div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      {% for step, desc in [('١', 'شغّل الساعة وانتظر حتى يضيء مؤشر الاتصال باللون الأزرق'), ('٢', 'أدخل اسم الجهاز والرقم التسلسلي في النموذج أعلاه'), ('٣', 'سيتم إرسال معرف الجهاز للساعة تلقائياً عبر البلوتوث'), ('٤', 'ستبدأ الساعة في إرسال بيانات الموقع فوراً')] %}
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;font-size:14px">{{ step }}</div>
+        <div style="color:var(--text-muted);font-size:14px;padding-top:8px">{{ desc }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

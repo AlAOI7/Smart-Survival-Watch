@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}أجهزتي{% endblock %}
+{% block page_title %}<i class="fas fa-watch" style="color:var(--primary)"></i> أجهزتي{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+  <div><h1>أجهزة ساعة النجاة</h1><p>إدارة ومتابعة جميع الأجهزة المرتبطة بحسابك</p></div>
+  <a href="{{ url_for('add_device') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة جهاز جديد</a>
+</div>
+
+{% if devices %}
+<div class="device-cards">
+  {% for d in devices %}
+  <div class="device-card">
+    <div class="device-card-header">
+      <div class="device-icon"><i class="fas fa-watch"></i></div>
+      <div>
+        <div class="device-name">{{ d.device_name }}</div>
+        <div class="device-id-text">{{ d.device_id }}</div>
+      </div>
+      <span class="badge {% if d.is_active %}badge-active{% else %}badge-muted{% endif %}" style="margin-right:auto">
+        {% if d.is_active %}● نشط{% else %}○ غير نشط{% endif %}
+      </span>
+    </div>
+
+    <div class="device-stats">
+      <div class="dstat">
+        <div class="dstat-val" style="color:{% if d.battery_level > 60 %}#2ed573{% elif d.battery_level > 20 %}#ffa502{% else %}#ff4757{% endif %}">{{ d.battery_level }}%</div>
+        <div class="dstat-lbl">⚡ البطارية</div>
+        <div class="battery-bar"><div class="battery-fill {% if d.battery_level>60 %}battery-high{% elif d.battery_level>20 %}battery-mid{% else %}battery-low{% endif %}" style="width:{{ d.battery_level }}%"></div></div>
+      </div>
+      <div class="dstat">
+        <div class="dstat-val" style="color:{% if d.satellite_connected %}#2ed573{% else %}#7a9bb5{% endif %}">
+          <i class="fas fa-satellite"></i>
+        </div>
+        <div class="dstat-lbl">{% if d.satellite_connected %}متصل{% else %}غير متصل{% endif %}</div>
+      </div>
+      <div class="dstat">
+        <div class="dstat-val" style="color:{% if d.solar_charging %}#ffa502{% else %}#7a9bb5{% endif %}">
+          <i class="fas fa-solar-panel"></i>
+        </div>
+        <div class="dstat-lbl">{% if d.solar_charging %}يشحن{% else %}شمس{% endif %}</div>
+      </div>
+      <div class="dstat">
+        <div class="dstat-val" style="color:var(--text-muted);font-size:12px">
+          {{ d.firmware_version or '1.0.0' }}
+        </div>
+        <div class="dstat-lbl">الإصدار</div>
+      </div>
+    </div>
+
+    {% if d.last_seen %}
+    <div style="font-size:11px;color:var(--text-muted);margin-top:10px;text-align:center">
+      <i class="fas fa-clock"></i> آخر ظهور: {{ d.last_seen.strftime('%Y/%m/%d %H:%M') }}
+    </div>
+    {% endif %}
+
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <a href="{{ url_for('device_detail', device_id=d.id) }}" class="btn btn-ghost btn-sm" style="flex:1;justify-content:center">
+        <i class="fas fa-chart-line"></i> التفاصيل
+      </a>
+      <button class="btn btn-sm" style="background:rgba(0,212,255,0.1);color:var(--primary);border:1px solid rgba(0,212,255,0.2)"
+        onclick="simulateScan({{ d.id }})">
+        <i class="fas fa-radar"></i> مسح
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:80px 40px">
+  <i class="fas fa-watch" style="font-size:60px;color:var(--primary);opacity:.3;display:block;margin-bottom:20px"></i>
+  <h3 style="color:#fff;margin-bottom:8px">لا توجد أجهزة مسجلة</h3>
+  <p style="color:var(--text-muted);margin-bottom:24px">أضف ساعتك الذكية للبدء في التتبع والحماية</p>
+  <a href="{{ url_for('add_device') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة أول جهاز</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function simulateScan(deviceId) {
+  fetch(`/api/simulate-scan/${deviceId}`, {method:'POST'})
+    .then(r=>r.json()).then(d=>{
+      if(d.success) showToast(`🔍 تم اكتشاف ${d.devices_found} أجهزة في المحيط`, 'success');
+    });
+}
+</script>
+{% endblock %}

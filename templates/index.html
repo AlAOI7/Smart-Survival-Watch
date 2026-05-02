@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NajatWatch - ساعة النجاة الذكية</title>
+<meta name="description" content="ساعة النجاة الذكية - حماية وإنقاذ عبر الأقمار الصناعية">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#8B5A2B;--primary-dark:#633E1A;--accent:#2C2C2C;--success:#6B8E23;--bg:#FAF7F2;--font:'Tajawal',sans-serif}
+body{font-family:var(--font);background:var(--bg);color:#1A1A1A;min-height:100vh;direction:rtl;overflow-x:hidden}
+/* Light glow bg */
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(139,90,43,0.05) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(44,44,44,0.03) 0%,transparent 50%);pointer-events:none;z-index:0}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 60px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-bottom:1px solid #E8E3DB;box-shadow:0 2px 10px rgba(0,0,0,0.02)}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.nav-logo{width:42px;height:42px;background:linear-gradient(135deg,var(--accent),#111);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#D2B48C;box-shadow:0 4px 12px rgba(44,44,44,0.3)}
+.nav-title{font-size:20px;font-weight:900;color:#1A1A1A}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a{color:#7A746B;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:15px;font-weight:600;transition:.2s}
+.nav-links a:hover{color:var(--primary);background:#F0EBE1}
+.nav-cta{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff!important;padding:9px 22px!important;border-radius:10px!important;font-weight:700!important;box-shadow:0 4px 15px rgba(139,90,43,0.25)}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(139,90,43,0.35)}
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 60px 60px;position:relative;z-index:1}
+.hero-content{max-width:750px;text-align:center}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(139,90,43,0.1);border:1px solid rgba(139,90,43,0.2);border-radius:30px;padding:8px 18px;font-size:13px;font-weight:700;color:var(--primary);margin-bottom:28px}
+.hero-tag span{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:62px;font-weight:900;line-height:1.15;margin-bottom:20px;color:#1A1A1A}
+.hero h1 .highlight{background:linear-gradient(135deg,var(--primary),#B8860B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:19px;color:#7A746B;line-height:1.7;margin-bottom:40px;font-weight:500}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-hero{display:inline-flex;align-items:center;gap:10px;padding:15px 34px;border-radius:12px;font-family:var(--font);font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;transition:.2s}
+.btn-hero:hover{transform:translateY(-3px)}
+.btn-main{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 8px 25px rgba(139,90,43,0.3)}
+.btn-outline{background:#fff;color:#1A1A1A;border:1px solid #E8E3DB;box-shadow:0 4px 12px rgba(0,0,0,0.03)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+/* WATCH VISUAL */
+.watch-visual{position:relative;width:220px;height:280px;margin:0 auto 50px;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+.watch-body{width:180px;height:220px;background:#ffffff;border-radius:36px;border:3px solid #E8E3DB;margin:0 auto;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.watch-screen{width:140px;height:160px;background:#1C1C1C;border-radius:24px;border:4px solid #F0EBE1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:inset 0 4px 12px rgba(0,0,0,0.8)}
+.watch-time{font-size:32px;font-weight:900;color:#D2B48C;letter-spacing:1px}
+.watch-sat{font-size:11px;font-weight:700;color:var(--success);display:flex;align-items:center;gap:4px}
+.watch-sos-dot{width:40px;height:40px;background:linear-gradient(135deg,#8B0000,#5C0000);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;box-shadow:0 0 20px rgba(139,0,0,0.5);animation:sos-glow 2s infinite}
+@keyframes sos-glow{0%,100%{box-shadow:0 0 15px rgba(139,0,0,0.4)}50%{box-shadow:0 0 25px rgba(139,0,0,0.8)}}
+.watch-strap{width:86px;height:36px;background:#2C2C2C;margin:0 auto;border-radius:6px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.5)}
+.watch-solar{position:absolute;top:10px;right:10px;font-size:9px;font-weight:800;color:#8B6508;background:rgba(210,180,140,0.3);padding:3px 8px;border-radius:6px}
+.orbit-ring{position:absolute;width:320px;height:320px;border:1px dashed #D2B48C;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);animation:spin 20s linear infinite;z-index:-1}
+.orbit-dot{position:absolute;width:12px;height:12px;background:var(--primary);border-radius:50%;top:0;left:50%;margin-left:-6px;box-shadow:0 0 15px var(--primary)}
+@keyframes spin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+/* FEATURES */
+.features{padding:100px 60px;position:relative;z-index:1;background:#ffffff;border-top:1px solid #E8E3DB;border-bottom:1px solid #E8E3DB}
+.section-title{text-align:center;margin-bottom:64px}
+.section-title h2{font-size:38px;font-weight:900;color:#1A1A1A;margin-bottom:14px}
+.section-title p{color:#7A746B;font-size:18px;font-weight:500}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px}
+.feat-card{background:#ffffff;border:1px solid #E8E3DB;border-radius:24px;padding:36px;transition:.3s;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.03)}
+.feat-card:hover{transform:translateY(-8px);border-color:var(--primary);box-shadow:0 15px 40px rgba(139,90,43,0.08)}
+.feat-icon{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px}
+.feat-icon.sat{background:rgba(139,90,43,0.1);color:var(--primary)}
+.feat-icon.phone{background:rgba(107,142,35,0.1);color:var(--success)}
+.feat-icon.sos{background:rgba(139,0,0,0.1);color:#8B0000}
+.feat-icon.solar{background:rgba(210,180,140,0.2);color:#8B6508}
+.feat-icon.light{background:rgba(44,44,44,0.1);color:var(--accent)}
+.feat-icon.sound{background:rgba(139,90,43,0.05);color:var(--primary-dark)}
+.feat-card h3{font-size:20px;font-weight:800;color:#1A1A1A;margin-bottom:12px}
+.feat-card p{font-size:15px;color:#7A746B;line-height:1.7;font-weight:500}
+/* CTA */
+.cta-section{padding:100px 60px;text-align:center;position:relative;z-index:1;background:var(--bg)}
+.cta-box{max-width:800px;margin:0 auto;background:#ffffff;border:1px solid #E8E3DB;border-radius:32px;padding:60px 40px;box-shadow:0 20px 40px rgba(0,0,0,0.04)}
+.cta-box h2{font-size:36px;font-weight:900;color:#1A1A1A;margin-bottom:16px}
+.cta-box p{color:#7A746B;margin-bottom:36px;font-size:18px;font-weight:500}
+footer{text-align:center;padding:36px;color:#BDB7AF;font-size:14px;font-weight:600;background:#ffffff;border-top:1px solid #E8E3DB;position:relative;z-index:1}
+@media(max-width:768px){nav{padding:16px 24px}.hero{padding:100px 24px 60px}.hero h1{font-size:42px}.features{padding:60px 24px}.cta-section{padding:60px 24px}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-logo"><i class="fas fa-satellite"></i></div>
+    <span class="nav-title">NajatWatch</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">المميزات</a>
+    <a href="{{ url_for('rescue_teams') if current_user and current_user.is_authenticated else '#' }}">فرق الإنقاذ</a>
+    {% if current_user and current_user.is_authenticated %}
+    <a href="{{ url_for('dashboard') }}" class="nav-cta"><i class="fas fa-chart-pie"></i> لوحة التحكم</a>
+    {% else %}
+    <a href="{{ url_for('login') }}" class="nav-cta"><i class="fas fa-right-to-bracket"></i> دخول</a>
+    {% endif %}
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-content">
+    <div style="position:relative;display:inline-block">
+      <div class="orbit-ring"><div class="orbit-dot"></div></div>
+      <div class="watch-visual">
+        <div class="watch-strap"></div>
+        <div class="watch-body">
+          <div class="watch-solar">☀ شحن شمسي</div>
+          <div class="watch-screen">
+            <div class="watch-time" id="wTime">--:--</div>
+            <div class="watch-sat"><i class="fas fa-satellite"></i> 6 أقمار</div>
+            <div class="watch-sos-dot">SOS</div>
+          </div>
+        </div>
+        <div class="watch-strap"></div>
+      </div>
+    </div>
+    <div class="hero-tag"><span></span> متصل بالأقمار الصناعية الآن</div>
+    <h1>ساعة <span class="highlight">النجاة</span> الذكية</h1>
+    <p>تقنية متطورة تربطك بالعالم حتى في أعمق الصحاري والجبال. مدعومة بالذكاء الاصطناعي لاكتشاف الأجهزة المحيطة وإرسال نداء الاستغاثة لفرق الإنقاذ تلقائياً.</p>
+    <div class="hero-btns">
+      <a href="{{ url_for('register') }}" class="btn-hero btn-main"><i class="fas fa-user-plus"></i> ابدأ الآن مجاناً</a>
+      <a href="#features" class="btn-hero btn-outline"><i class="fas fa-circle-play"></i> اكتشف المميزات</a>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="section-title">
+    <h2>مميزات ساعة النجاة</h2>
+    <p>تقنيات متطورة مصممة لإنقاذ حياتك في أصعب الظروف</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card" style="border-top: 4px solid #D2B48C;">
+      <div class="feat-icon" style="background:#2C2C2C; color:#D2B48C;"><i class="fas fa-brain"></i></div>
+      <h3>مُحلل طوارئ بالذكاء الاصطناعي</h3>
+      <p>نموذج ذكاء اصطناعي مدمج يقوم بتحليل حالة الطوارئ (الموقع، الأجهزة القريبة، البطارية) لتقديم نصائح نجاة وخطة إنقاذ فورية.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon sat"><i class="fas fa-satellite"></i></div>
+      <h3>اتصال دائم بالأقمار الصناعية</h3>
+      <p>تعمل الساعة بنظام GPS متقدم يتصل بأكثر من 6 أقمار صناعية لتحديد موقعك بدقة متناهية في أي مكان.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon phone"><i class="fas fa-mobile-signal"></i></div>
+      <h3>اكتشاف الأجهزة المحيطة</h3>
+      <p>تمسح الساعة المحيط بحثاً عن إشارات Bluetooth والـ WiFi لاكتشاف الهواتف القريبة، وتعرض المسافة التقديرية لكل جهاز.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon sos"><i class="fas fa-bell-concierge"></i></div>
+      <h3>نداء استغاثة ذكي</h3>
+      <p>عند الضغط على زر SOS أو عدم وجود أجهزة قريبة، يُرسَل نداء استغاثة فوري لأقرب فريق إنقاذ مع إحداثيات موقعك.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon solar"><i class="fas fa-solar-panel"></i></div>
+      <h3>شحن بالطاقة الشمسية</h3>
+      <p>لوح شمسي مدمج يشحن الساعة باستمرار خلال النهار، ما يضمن عملها لفترات طويلة جداً.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon light"><i class="fas fa-lightbulb"></i></div>
+      <h3>ضوء ليلي وصفارة قوية</h3>
+      <p>مصباح LED عالي السطوع وصفارة إنذار تساعد فرق الإنقاذ على إيجادك بكل سهولة ليلاً ونهاراً.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-box">
+    <h2>🛡 كن دائماً في أمان</h2>
+    <p>سجّل الآن وأضف ساعتك الذكية لتبدأ حماية نفسك وعائلتك أينما كنتم</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="{{ url_for('register') }}" class="btn-hero btn-main"><i class="fas fa-shield-heart"></i> إنشاء حساب مجاني</a>
+      <a href="{{ url_for('login') }}" class="btn-hero btn-outline"><i class="fas fa-right-to-bracket"></i> تسجيل الدخول</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2024 NajatWatch - ساعة النجاة الذكية المدعومة بالذكاء الاصطناعي | جميع الحقوق محفوظة</p>
+</footer>
+
+<script>
+function updateWatchTime(){
+  const now=new Date();
+  document.getElementById('wTime').textContent=now.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+}
+updateWatchTime();setInterval(updateWatchTime,1000);
+</script>
+</body>
+</html>

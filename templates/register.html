@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إنشاء حساب | NajatWatch</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;background:#FAF7F2;color:#1A1A1A;min-height:100vh;direction:rtl;display:flex;align-items:center;justify-content:center;padding:20px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 70% 30%,rgba(107,142,35,0.05) 0%,transparent 60%),radial-gradient(ellipse at 30% 70%,rgba(139,90,43,0.03) 0%,transparent 50%);pointer-events:none}
+.auth-card{background:#ffffff;border:1px solid #E8E3DB;border-radius:24px;padding:44px 40px;width:100%;max-width:460px;position:relative;box-shadow:0 20px 40px rgba(0,0,0,0.05)}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,#6B8E23,transparent);border-radius:24px 24px 0 0}
+.auth-brand{text-align:center;margin-bottom:30px}
+.auth-logo{width:60px;height:60px;background:linear-gradient(135deg,#6B8E23,#556B2F);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;margin:0 auto 12px;box-shadow:0 8px 16px rgba(107,142,35,0.25)}
+.auth-brand h1{font-size:22px;font-weight:900;color:#1A1A1A}
+.auth-brand p{color:#7A746B;font-size:14px;font-weight:500;margin-top:4px}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:14px;font-weight:700;color:#1A1A1A;margin-bottom:8px}
+.input-wrap{position:relative}
+.input-icon{position:absolute;top:50%;transform:translateY(-50%);right:14px;color:#BDB7AF;font-size:15px;pointer-events:none}
+.form-input{width:100%;background:#ffffff;border:1px solid #E8E3DB;border-radius:12px;padding:12px 44px 12px 14px;color:#1A1A1A;font-family:'Tajawal',sans-serif;font-size:14.5px;font-weight:500;transition:.2s;box-shadow:inset 0 2px 4px rgba(0,0,0,0.01)}
+.form-input:focus{outline:none;border-color:#6B8E23;box-shadow:0 0 0 3px rgba(107,142,35,0.15)}
+.form-input::placeholder{color:#BDB7AF;font-weight:400}
+.btn-submit{width:100%;background:linear-gradient(135deg,#6B8E23,#556B2F);color:#fff;border:none;padding:15px;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;box-shadow:0 8px 20px rgba(107,142,35,0.3);transition:.2s}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(107,142,35,0.4)}
+.auth-footer{text-align:center;margin-top:22px;font-size:14px;font-weight:500;color:#7A746B}
+.auth-footer a{color:#6B8E23;font-weight:700;text-decoration:none}
+.flash-msg{padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;margin-bottom:20px;display:flex;align-items:center;gap:10px;border-right:4px solid}
+.flash-error{background:#fff;border-color:#8B0000;color:#8B0000;box-shadow:0 4px 12px rgba(139,0,0,0.1)}
+.back-home{position:fixed;top:20px;right:20px;color:#7A746B;text-decoration:none;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;padding:10px 16px;border-radius:10px;background:#ffffff;border:1px solid #E8E3DB;transition:.2s;box-shadow:0 2px 8px rgba(0,0,0,0.02)}
+.back-home:hover{color:#6B8E23;border-color:#6B8E23;transform:translateY(-2px)}
+</style>
+</head>
+<body>
+<a href="/" class="back-home"><i class="fas fa-arrow-right"></i> الرئيسية</a>
+<div class="auth-card">
+  <div class="auth-brand">
+    <div class="auth-logo"><i class="fas fa-user-plus"></i></div>
+    <h1>إنشاء حساب جديد</h1>
+    <p>انضم إلى شبكة ساعة النجاة الذكية</p>
+  </div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+  <div class="flash-msg flash-{{ cat }}"><i class="fas fa-circle-exclamation"></i> {{ msg }}</div>
+  {% endfor %}
+  {% endwith %}
+  <form method="POST" action="{{ url_for('register') }}">
+    <div class="form-group">
+      <label class="form-label">الاسم الكامل</label>
+      <div class="input-wrap">
+        <i class="fas fa-user input-icon"></i>
+        <input type="text" name="full_name" class="form-input" placeholder="محمد العتيبي" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">البريد الإلكتروني</label>
+      <div class="input-wrap">
+        <i class="fas fa-envelope input-icon"></i>
+        <input type="email" name="email" class="form-input" placeholder="example@email.com" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">رقم الهاتف</label>
+      <div class="input-wrap">
+        <i class="fas fa-phone input-icon"></i>
+        <input type="tel" name="phone" class="form-input" placeholder="05xxxxxxxx">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">كلمة المرور</label>
+      <div class="input-wrap">
+        <i class="fas fa-lock input-icon"></i>
+        <input type="password" name="password" class="form-input" placeholder="••••••••" required minlength="6">
+      </div>
+    </div>
+    <button type="submit" class="btn-submit"><i class="fas fa-shield-heart"></i> إنشاء الحساب</button>
+  </form>
+  <div class="auth-footer">لديك حساب بالفعل؟ <a href="{{ url_for('login') }}">تسجيل الدخول</a></div>
+</div>
+</body>
+</html>
